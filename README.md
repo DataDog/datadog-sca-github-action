@@ -41,7 +41,7 @@ jobs:
       uses: actions/checkout@v3
     - name: Generate SBOM and Upload
       id: tdb-tests
-      uses: juli1/tdb-github-action@main
+      uses: DataDog/datadog-static-analyzer-github-action@main
       with:
         dd_api_key: ${{ secrets.DD_API_KEY }}
         dd_app_key: ${{ secrets.DD_APP_KEY }}
