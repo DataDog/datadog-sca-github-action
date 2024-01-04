@@ -27,11 +27,6 @@ Add the following code snippet in `.github/workflows/datadog-sca.yml`.
 
 
 ```yaml
-on:
-  push:
-    branches:
-      - main
-
 jobs:
   software-composition-analysis:
     runs-on: ubuntu-latest
