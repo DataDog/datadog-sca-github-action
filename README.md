@@ -29,6 +29,8 @@ Add the following code snippet in `.github/workflows/datadog-sca.yml`.
 ```yaml
 on: push
 
+name: Software Composition Analysis
+
 jobs:
   software-composition-analysis:
     runs-on: ubuntu-latest
