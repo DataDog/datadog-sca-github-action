@@ -1,35 +1,30 @@
 # datadog-sca-github-action
 
-**WARNING**: This work is under development and not ready for any production use.
-
-The `datadog-sca-github-action` is a GitHub Action to generate SBOM and upload them to Datadog.
+Run a Datadog [Software Composition Analysis][1] job in your GitHub Action workflows.
 
 ## SBOM Generation
 
-The GitHub action generates the SBOM automatically based on 
-dependencies declared in your repository.
+The GitHub Action generates a SBOM report automatically based on dependencies declared in your repository.
 
 The GitHub Action works for the following languages and following files:
 
- - JavaScript/Typescript: `package-lock.json` and `yarn.lock`
+ - JavaScript/TypeScript: `package-lock.json` and `yarn.lock`
  - Python: `requirements.txt` (with version defined) and `poetry.lock`
 
 ## Setup
 
 ### Set up keys
 
-Add `DD_APP_KEY` and `DD_API_KEY` in your GitHub actions secrets.
+Add `DD_APP_KEY` and `DD_API_KEY` as secrets in your [GitHub Actions Settings][2].
 
 ### Workflow
 
-
 Add the following code snippet in `.github/workflows/datadog-sca.yml`.
 
-
 ```yaml
-on: push
+on: [push]
 
-name: Software Composition Analysis
+name: Datadog Software Composition Analysis
 
 jobs:
   software-composition-analysis:
@@ -38,13 +33,22 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Generate SBOM and Upload
-      id: software-composition-analysis
+    - name: Check imported libraries are secure and compliant
+      id: datadog-software-composition-analysis
       uses: DataDog/datadog-sca-github-action@main
       with:
         dd_api_key: ${{ secrets.DD_API_KEY }}
         dd_app_key: ${{ secrets.DD_APP_KEY }}
-        dd_service: <enter-service>
-        dd_env: <enter-env>
-        dd_site: <enter-site>
+        dd_service: my-app
+        dd_env: ci
+        dd_site: datadoghq.com
 ```
+
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Learn about Software Composition Analysis][1]
+
+[1]: https://docs.datadoghq.com/code_analysis/software_composition_analysis
+[2]: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository
