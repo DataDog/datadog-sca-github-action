@@ -41,7 +41,7 @@ jobs:
         dd_app_key: ${{ secrets.DD_APP_KEY }}
         dd_service: my-app
         dd_env: ci
-        dd_site: datadoghq.com
+        dd_site: {{< region-param key="dd_site" code="true" >}}
 ```
 
 ## Further Reading
