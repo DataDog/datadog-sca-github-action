@@ -10,7 +10,7 @@ RUN dpkg -i /tmp/trivy.deb
 RUN rm -f /tmp/trivy.dev
 
 # Install node 20
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs
 
 # Copy files from our repository location to the filesystem path `/` of the container
