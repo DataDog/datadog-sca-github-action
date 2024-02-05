@@ -9,10 +9,8 @@ RUN curl -L -o /tmp/trivy.deb https://github.com/aquasecurity/trivy/releases/dow
 RUN dpkg -i /tmp/trivy.deb
 RUN rm -f /tmp/trivy.dev
 
-# Install node 16
-RUN curl -sL https://deb.nodesource.com/setup_16.x -o nodesource_setup.sh
-RUN chmod a+x ./nodesource_setup.sh
-RUN ./nodesource_setup.sh
+# Install node 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 RUN apt-get install -y nodejs
 
 # Copy files from our repository location to the filesystem path `/` of the container
