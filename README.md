@@ -27,21 +27,20 @@ Add the following code snippet in `.github/workflows/datadog-sca.yml`.
 
 
 ```yaml
-on:
-  push:
-    branches:
-      - main
+on: push
+
+name: Software Composition Analysis
 
 jobs:
-  check-quality:
+  software-composition-analysis:
     runs-on: ubuntu-latest
     name: Datadog SBOM Generation and Upload
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Generate SBOM and Upload
-      id: tdb-tests
-      uses: DataDog/datadog-static-analyzer-github-action@main
+      id: software-composition-analysis
+      uses: DataDog/datadog-sca-github-action@main
       with:
         dd_api_key: ${{ secrets.DD_API_KEY }}
         dd_app_key: ${{ secrets.DD_APP_KEY }}
