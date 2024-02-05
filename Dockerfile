@@ -5,10 +5,9 @@ FROM ubuntu:22.04
 RUN apt-get update
 RUN apt-get install -y git unzip curl
 RUN apt-get install -y wget apt-transport-https gnupg lsb-release
-RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
-RUN echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | tee -a /etc/apt/sources.list.d/trivy.list
-RUN apt-get update
-RUN apt-get install -y trivy
+RUN curl -L -o /tmp/trivy.deb https://github.com/aquasecurity/trivy/releases/download/v0.48.3/trivy_0.48.3_Linux-64bit.deb  >/dev/null 2>&1 || exit 1
+RUN dpkg -i -f /tmp/trivy.deb
+RUN rm -f /tmp/trivy.dev
 
 # Install node 16
 RUN curl -sL https://deb.nodesource.com/setup_16.x -o nodesource_setup.sh
