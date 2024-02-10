@@ -100,7 +100,7 @@ echo "Done: will output results at $OUTPUT_FILE"
 cd ${GITHUB_WORKSPACE} || exit 1
 git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
-if [ "$USE_OSV_SCANNER" == "true" ]; then
+if [ "$USE_OSV_SCANNER" = "true" ]; then
     /osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-4 --output="$OUTPUT_FILE" .
 else
    echo "Generating SBOM with trivy"
