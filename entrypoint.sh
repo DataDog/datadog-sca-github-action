@@ -88,7 +88,7 @@ if [ ! -d "$OUTPUT_DIRECTORY" ]; then
     exit 1
 fi
 
-OUTPUT_FILE="$OUTPUT_DIRECTORY/trivy.json"
+OUTPUT_FILE="$OUTPUT_DIRECTORY/sbom.json"
 
 echo "Done: will output results at $OUTPUT_FILE"
 
@@ -101,6 +101,7 @@ cd ${GITHUB_WORKSPACE} || exit 1
 git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
 if [ "$USE_OSV_SCANNER" = "true" ]; then
+   echo "Generating SBOM with osv-scanner"
     /osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-4 --output="$OUTPUT_FILE" . || exit 1
 else
    echo "Generating SBOM with trivy"
