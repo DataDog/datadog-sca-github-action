@@ -22,6 +22,10 @@ inputs:
     description: "The Datadog site. For example, users in the EU may want to set datadoghq.eu."
     required: false
     default: "datadoghq.com"
+  use_osv_scanner:
+    description: "Use Datadog osv-scanner to produce an SBOM"
+    required: false
+    default: "false"
 runs:
   using: "docker"
   image: "Dockerfile"
@@ -31,3 +35,4 @@ runs:
     DD_SERVICE: ${{ inputs.dd_service }}
     DD_ENV: ${{ inputs.dd_env }}
     DD_SITE: ${{ inputs.dd_site }}
+    USE_OSV_SCANNER: ${{ inputs.use_osv_scanner }}
