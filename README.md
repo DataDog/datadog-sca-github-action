@@ -10,6 +10,10 @@ The GitHub Action works for the following languages and following files:
 
  - JavaScript/TypeScript: `package-lock.json` and `yarn.lock`
  - Python: `requirements.txt` (with version defined) and `poetry.lock`
+ - Java: `pom.xml`
+ - C#
+ - Ruby
+ - ... and more languages (listed in the [documentation](https://docs.datadoghq.com/code_analysis/software_composition_analysis/))
 
 ## Setup
 
