@@ -102,7 +102,7 @@ git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
 if [ "$USE_OSV_SCANNER" = "true" ]; then
    echo "Generating SBOM with osv-scanner"
-    /osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-4 --output="$OUTPUT_FILE" . || exit 1
+    /osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-5 --paths-relative-to-scan-dir --output="$OUTPUT_FILE" . || exit 1
 else
    echo "Generating SBOM with trivy"
    trivy fs --output "$OUTPUT_FILE" --format cyclonedx . || exit 1

@@ -25,7 +25,7 @@ inputs:
   use_osv_scanner:
     description: "Use Datadog osv-scanner to produce an SBOM"
     required: false
-    default: "false"
+    default: "true"
 runs:
   using: "docker"
   image: "Dockerfile"
