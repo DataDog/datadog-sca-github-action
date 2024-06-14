@@ -2,9 +2,9 @@
 
 Run a Datadog [Software Composition Analysis][1] job in your GitHub Action workflows.
 
-## SBOM Generation
+## Library Inventory Generation
 
-The GitHub Action generates a SBOM report automatically based on dependencies declared in your repository.
+The GitHub Action generates an inventory of libraries automatically based on the libraries that are declared in your repository.
 
 The GitHub Action works for the following languages and following files:
 
