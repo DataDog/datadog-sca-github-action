@@ -68,6 +68,10 @@ git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 if [ "$USE_OSV_SCANNER" = "true" ]; then
    echo "Generating SBOM with osv-scanner"
     /osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-5 --paths-relative-to-scan-dir --output="$OUTPUT_FILE" . || exit 1
+    if [[ ! -s $OUTPUT_FILE ]]; then
+        EMPTY_SBOM_1_5 = '{"$schema":"http://cyclonedx.org/schema/bom-1.5.schema.json","bomFormat":"CycloneDX","specVersion":"1.5","version":1,"components":[]}'
+        echo "$EMPTY_SBOM_1_5" > "$OUTPUT_FILE"
+    fi
 else
    echo "Generating SBOM with trivy"
    trivy fs --output "$OUTPUT_FILE" --format cyclonedx . || exit 1
