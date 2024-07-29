@@ -1,6 +1,9 @@
 name: "Datadog Software Composition Analysis"
 description: "Generate SBOM and upload to Datadog"
 author: "Datadog"
+branding:
+  icon: 'check'
+  color: 'purple'
 inputs:
   dd_api_key:
     description: "Your Datadog API key used to authenticate requests."
