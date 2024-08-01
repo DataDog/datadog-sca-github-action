@@ -74,6 +74,7 @@ else
 fi
 echo "Done"
 
+cat "$OUTPUT_FILE"
 
 echo "Uploading results to Datadog"
 DD_BETA_COMMANDS_ENABLED=1 ${DATADOG_CLI_PATH} sbom upload --service "$DD_SERVICE" --env "$DD_ENV" "$OUTPUT_FILE" || exit 1
