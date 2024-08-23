@@ -20,7 +20,7 @@ The GitHub Action works for the following languages and following files:
 
 ### Set up keys
 
-Add `DD_APP_KEY` and `DD_API_KEY` as secrets in your [GitHub Actions Settings][2].
+Add `DD_APP_KEY` and `DD_API_KEY` as secrets in your [GitHub Actions Settings][2]. Please ensure your Datadog application key has the `code_analysis_read` scope. 
 
 ### Workflow
 
