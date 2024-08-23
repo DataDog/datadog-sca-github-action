@@ -20,7 +20,7 @@ The GitHub Action works for the following languages and following files:
 
 ### Set up keys
 
-Add `DD_APP_KEY` and `DD_API_KEY` as secrets in your [GitHub Actions Settings][2]. Please ensure your Datadog application key has the `code_analysis_read` scope. 
+Add `DD_APP_KEY` and `DD_API_KEY` as secrets in your [GitHub Actions Settings][2]. Please ensure your Datadog application key has the `code_analysis_read` scope. For more information, see [API and Application Keys][7].
 
 ### Workflow
 
@@ -68,3 +68,4 @@ Additional helpful documentation, links, and articles:
 [4]: https://docs.datadoghq.com/getting_started/site/
 [5]: https://docs.datadoghq.com/code_analysis/static_analysis
 [6]: https://github.com/DataDog/datadog-static-analyzer-github-action
+[7]: https://docs.datadoghq.com/account_management/api-app-keys/
