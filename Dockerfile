@@ -1,6 +1,9 @@
 # Ubuntu container image to run our static analyzer
 FROM ubuntu:22.04
 
+RUN apt-get update
+RUN apt-get install curl
+
 # Install node 20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs
