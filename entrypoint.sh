@@ -28,7 +28,7 @@ fi
 ########################################################
 echo "Installing osv-scanner"
 mkdir /osv-scanner
-if [ "$(uname -m)" == "aarch64"];
+if [ "$(uname -m)" == "aarch64"]; then
   curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.7.1/osv-scanner_linux_arm64.zip" >/dev/null 2>&1 || exit 1
 else
   curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.7.1/osv-scanner_linux_amd64.zip" >/dev/null 2>&1 || exit 1
