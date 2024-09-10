@@ -23,6 +23,13 @@ if [ -z "$DD_SERVICE" ]; then
     exit 1
 fi
 
+########################################################
+# osv-scanner
+########################################################
+mkdir /osv-scanner
+curl -L -o /osv-scanner/osv-scanner.zip https://github.com/DataDog/osv-scanner/releases/download/v0.7.1/osv-scanner_linux_$(uname -m).zip >/dev/null 2>&1 || exit 1
+(cd /osv-scanner && unzip osv-scanner.zip)
+chmod 755 /osv-scanner/osv-scanner
 
 ########################################################
 # datadog-ci stuff
@@ -40,6 +47,7 @@ fi
 
 echo "Done: datadog-ci available $DATADOG_CLI_PATH"
 echo "Version: $($DATADOG_CLI_PATH version)"
+
 
 ########################################################
 # output directory
