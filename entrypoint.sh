@@ -23,6 +23,20 @@ if [ -z "$DD_SERVICE" ]; then
     exit 1
 fi
 
+########################################################
+# osv-scanner
+########################################################
+mkdir /osv-scanner
+if [ "$(uname -m)" = "aarch64" ]; then
+  echo "Installing osv-scanner for ARM64"
+  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.7.1/osv-scanner_linux_arm64.zip" >/dev/null 2>&1 || exit 1
+else
+  echo "Installing osv-scanner for AMD64"
+  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.7.1/osv-scanner_linux_amd64.zip" >/dev/null 2>&1 || exit 1
+fi
+
+(cd /osv-scanner && unzip osv-scanner.zip)
+chmod 755 /osv-scanner/osv-scanner
 
 ########################################################
 # datadog-ci stuff
@@ -40,6 +54,7 @@ fi
 
 echo "Done: datadog-ci available $DATADOG_CLI_PATH"
 echo "Version: $($DATADOG_CLI_PATH version)"
+
 
 ########################################################
 # output directory
@@ -65,16 +80,12 @@ echo "Done: will output results at $OUTPUT_FILE"
 cd ${GITHUB_WORKSPACE} || exit 1
 git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
-if [ "$USE_OSV_SCANNER" = "true" ]; then
-   echo "Generating SBOM with osv-scanner"
-    /osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-5 --paths-relative-to-scan-dir --output="$OUTPUT_FILE" . || exit 1
-else
-   echo "Generating SBOM with trivy"
-   trivy fs --output "$OUTPUT_FILE" --format cyclonedx . || exit 1
-fi
+
+echo "Generating SBOM with osv-scanner"
+/osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-5 --paths-relative-to-scan-dir --output="$OUTPUT_FILE" . || exit 1
 echo "Done"
 
 
 echo "Uploading results to Datadog"
-DD_BETA_COMMANDS_ENABLED=1 ${DATADOG_CLI_PATH} sbom upload --service "$DD_SERVICE" --env "$DD_ENV" "$OUTPUT_FILE" || exit 1
+${DATADOG_CLI_PATH} sbom upload --service "$DD_SERVICE" --env "$DD_ENV" "$OUTPUT_FILE" || exit 1
 echo "Done"
