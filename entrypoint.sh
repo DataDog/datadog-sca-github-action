@@ -65,16 +65,12 @@ echo "Done: will output results at $OUTPUT_FILE"
 cd ${GITHUB_WORKSPACE} || exit 1
 git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
-if [ "$USE_OSV_SCANNER" = "true" ]; then
-   echo "Generating SBOM with osv-scanner"
-    /osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-5 --paths-relative-to-scan-dir --output="$OUTPUT_FILE" . || exit 1
-else
-   echo "Generating SBOM with trivy"
-   trivy fs --output "$OUTPUT_FILE" --format cyclonedx . || exit 1
-fi
+
+echo "Generating SBOM with osv-scanner"
+/osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-5 --paths-relative-to-scan-dir --output="$OUTPUT_FILE" . || exit 1
 echo "Done"
 
 
 echo "Uploading results to Datadog"
-DD_BETA_COMMANDS_ENABLED=1 ${DATADOG_CLI_PATH} sbom upload --service "$DD_SERVICE" --env "$DD_ENV" "$OUTPUT_FILE" || exit 1
+${DATADOG_CLI_PATH} sbom upload --service "$DD_SERVICE" --env "$DD_ENV" "$OUTPUT_FILE" || exit 1
 echo "Done"

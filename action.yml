@@ -25,10 +25,6 @@ inputs:
     description: "The Datadog site. For example, users in the EU may want to set datadoghq.eu."
     required: false
     default: "datadoghq.com"
-  use_osv_scanner:
-    description: "Use Datadog osv-scanner to produce an SBOM"
-    required: false
-    default: "true"
 runs:
   using: "docker"
   image: "Dockerfile"
