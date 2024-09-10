@@ -2,7 +2,7 @@
 FROM ubuntu:22.04
 
 RUN apt-get update
-RUN apt-get install curl
+RUN apt-get install -y curl
 
 # Install node 20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
