@@ -13,16 +13,6 @@ if [ -z "$DD_APP_KEY" ]; then
     exit 1
 fi
 
-if [ -z "$DD_ENV" ]; then
-    echo "DD_ENV not set. Please set this variable and try again."
-    exit 1
-fi
-
-if [ -z "$DD_SERVICE" ]; then
-    echo "DD_SERVICE not set. Please set this variable and try again."
-    exit 1
-fi
-
 ########################################################
 # osv-scanner
 ########################################################
@@ -73,7 +63,7 @@ OUTPUT_FILE="$OUTPUT_DIRECTORY/sbom.json"
 echo "Done: will output results at $OUTPUT_FILE"
 
 ########################################################
-# execute trivy and upload the results
+# execute osv-scanner and upload the results
 ########################################################
 
 # navigate to workspace root, so the datadog-ci command can access the git info
@@ -87,5 +77,5 @@ echo "Done"
 
 
 echo "Uploading results to Datadog"
-${DATADOG_CLI_PATH} sbom upload --service "$DD_SERVICE" --env "$DD_ENV" "$OUTPUT_FILE" || exit 1
+${DATADOG_CLI_PATH} sbom upload --service osv-scanner --env ci "$OUTPUT_FILE" || exit 1
 echo "Done"
