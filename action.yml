@@ -1,6 +1,9 @@
 name: "Datadog Software Composition Analysis"
 description: "Generate SBOM and upload to Datadog"
 author: "Datadog"
+branding:
+  icon: 'check'
+  color: 'purple'
 inputs:
   dd_api_key:
     description: "Your Datadog API key used to authenticate requests."
@@ -10,29 +13,14 @@ inputs:
     description: "Your Datadog Application key used to authenticate requests."
     required: true
     default: ""
-  dd_service:
-    description: "The service you want your results tagged with."
-    required: true
-    default: ""
-  dd_env:
-    description: "The environment you want your results tagged with."
-    required: false
-    default: "none"
   dd_site:
     description: "The Datadog site. For example, users in the EU may want to set datadoghq.eu."
     required: false
     default: "datadoghq.com"
-  use_osv_scanner:
-    description: "Use Datadog osv-scanner to produce an SBOM"
-    required: false
-    default: "false"
 runs:
   using: "docker"
   image: "Dockerfile"
   env:
     DD_API_KEY: ${{ inputs.dd_api_key }}
     DD_APP_KEY: ${{ inputs.dd_app_key }}
-    DD_SERVICE: ${{ inputs.dd_service }}
-    DD_ENV: ${{ inputs.dd_env }}
     DD_SITE: ${{ inputs.dd_site }}
-    USE_OSV_SCANNER: ${{ inputs.use_osv_scanner }}
