@@ -19,10 +19,10 @@ fi
 mkdir /osv-scanner
 if [ "$(uname -m)" = "aarch64" ]; then
   echo "Installing osv-scanner for ARM64"
-  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.12.0/osv-scanner_linux_arm64.zip" >/dev/null 2>&1 || exit 1
+  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.13.0/osv-scanner_linux_arm64.zip" >/dev/null 2>&1 || exit 1
 else
   echo "Installing osv-scanner for AMD64"
-  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.12.0/osv-scanner_linux_amd64.zip" >/dev/null 2>&1 || exit 1
+  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.13.0/osv-scanner_linux_amd64.zip" >/dev/null 2>&1 || exit 1
 fi
 
 (cd /osv-scanner && unzip osv-scanner.zip)
