@@ -14,19 +14,19 @@ if [ -z "$DD_APP_KEY" ]; then
 fi
 
 ########################################################
-# osv-scanner
+# datadog-sbom-generator
 ########################################################
-mkdir /osv-scanner
+mkdir /datadog-sbom-generator
 if [ "$(uname -m)" = "aarch64" ]; then
-  echo "Installing osv-scanner for ARM64"
-  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.14.0/osv-scanner_linux_arm64.zip" >/dev/null 2>&1 || exit 1
+  echo "Installing datadog-sbom-generator for ARM64"
+  curl -L -o "/datadog-sbom-generator/datadog-sbom-generator.zip" "https://github.com/DataDog/datadog-sbom-generator/releases/latest/download/datadog-sbom-generator_linux_arm64.zip" >/dev/null 2>&1 || exit 1
 else
-  echo "Installing osv-scanner for AMD64"
-  curl -L -o "/osv-scanner/osv-scanner.zip" "https://github.com/DataDog/osv-scanner/releases/download/v0.14.0/osv-scanner_linux_amd64.zip" >/dev/null 2>&1 || exit 1
+  echo "Installing datadog-sbom-generator for AMD64"
+  curl -L -o "/datadog-sbom-generator/datadog-sbom-generator.zip" "https://github.com/DataDog/datadog-sbom-generator/releases/latest/download/datadog-sbom-generator_linux_amd64.zip" >/dev/null 2>&1 || exit 1
 fi
 
-(cd /osv-scanner && unzip osv-scanner.zip)
-chmod 755 /osv-scanner/osv-scanner
+(cd /datadog-sbom-generator && unzip datadog-sbom-generator.zip)
+chmod 755 /datadog-sbom-generator/datadog-sbom-generator
 
 ########################################################
 # datadog-ci stuff
@@ -63,7 +63,7 @@ OUTPUT_FILE="$OUTPUT_DIRECTORY/sbom.json"
 echo "Done: will output results at $OUTPUT_FILE"
 
 ########################################################
-# execute osv-scanner and upload the results
+# execute datadog-sbom-generator and upload the results
 ########################################################
 
 # navigate to workspace root, so the datadog-ci command can access the git info
@@ -71,11 +71,11 @@ cd ${GITHUB_WORKSPACE} || exit 1
 git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
 
-echo "Generating SBOM with osv-scanner"
-/osv-scanner/osv-scanner --skip-git -r --experimental-only-packages --format=cyclonedx-1-5 --paths-relative-to-scan-dir --output="$OUTPUT_FILE" . || exit 1
+echo "Generating SBOM with datadog-sbom-generator"
+/datadog-sbom-generator/datadog-sbom-generator scan --output="$OUTPUT_FILE" . || exit 1
 echo "Done"
 
 
 echo "Uploading results to Datadog"
-${DATADOG_CLI_PATH} sbom upload --service osv-scanner --env ci "$OUTPUT_FILE" || exit 1
+${DATADOG_CLI_PATH} sbom upload --service datadog-sbom-generator --env ci "$OUTPUT_FILE" || exit 1
 echo "Done"
