@@ -1,6 +1,6 @@
 # datadog-sca-github-action
 
-Run a Datadog [Software Composition Analysis][1] job in your GitHub Action workflows. This action invokes
+Run a Datadog [Software Composition Analysis][1] job in your GitHub Actions workflows. This action invokes
 [Datadog osv-scanner][3] on your codebase and uploads the results into Datadog.
 
 ## Library Inventory Generation
