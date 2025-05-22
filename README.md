@@ -1,7 +1,7 @@
 # datadog-sca-github-action
 
 Run a Datadog [Software Composition Analysis][1] job in your GitHub Action workflows. This action invokes
-[Datadog osv-scanner][3] on your codebase and uploads the results into Datadog.
+[Datadog SBOM Generator][3] on your codebase and uploads the results into Datadog.
 
 ## Library Inventory Generation
 
@@ -62,7 +62,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://docs.datadoghq.com/code_analysis/software_composition_analysis
 [2]: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository
-[3]: https://github.com/DataDog/osv-scanner
+[3]: https://github.com/DataDog/datadog-sbom-generator
 [4]: https://docs.datadoghq.com/getting_started/site/
 [5]: https://docs.datadoghq.com/code_analysis/static_analysis
 [6]: https://github.com/DataDog/datadog-static-analyzer-github-action
