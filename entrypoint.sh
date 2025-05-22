@@ -72,7 +72,7 @@ git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
 
 echo "Generating SBOM with datadog-sbom-generator"
-/datadog-sbom-generator/datadog-sbom-generator scan --output="$OUTPUT_FILE" . || exit 1
+/datadog-sbom-generator/datadog-sbom-generator scan --verbosity info --output="$OUTPUT_FILE" . || exit 1
 echo "Done"
 
 
