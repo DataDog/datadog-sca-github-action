@@ -17,6 +17,10 @@ inputs:
     description: "The Datadog site. For example, users in the EU may want to set datadoghq.eu."
     required: false
     default: "datadoghq.com"
+  reachability:
+    description: "Enable reachability scanning. Defaults to true."
+    required: false
+    default: "true"
 runs:
   using: "docker"
   image: "Dockerfile"
@@ -24,3 +28,4 @@ runs:
     DD_API_KEY: ${{ inputs.dd_api_key }}
     DD_APP_KEY: ${{ inputs.dd_app_key }}
     DD_SITE: ${{ inputs.dd_site }}
+    REACHABILITY: ${{ inputs.reachability }}
