@@ -83,5 +83,5 @@ echo "Done"
 
 
 echo "Uploading results to Datadog"
-${DATADOG_CLI_PATH} sbom upload --service datadog-sbom-generator --env ci "$OUTPUT_FILE" || exit 1
+${DATADOG_CLI_PATH} sbom upload --source github-action --service datadog-sbom-generator --env ci "$OUTPUT_FILE" || exit 1
 echo "Done"
