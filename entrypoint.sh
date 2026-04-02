@@ -39,18 +39,18 @@ chmod 755 /datadog-sbom-generator/datadog-sbom-generator
 ########################################################
 DATADOG_CI_VERSION="5.11.0"
 DATADOG_CI_PATH="/usr/local/bin/datadog-ci"
+DATADOG_CI_RELEASE_BASE="https://github.com/DataDog/datadog-ci/releases/download/v${DATADOG_CI_VERSION}"
 
 echo "Installing 'datadog-ci' v${DATADOG_CI_VERSION}"
 if [ "$(uname -m)" = "aarch64" ]; then
   DATADOG_CI_BINARY="datadog-ci_linux-arm64"
-  DATADOG_CI_CHECKSUM="fab804583d79f0c5e042f73b3f90fd05336fe409a23ab0bab5219122db13232f"
 else
   DATADOG_CI_BINARY="datadog-ci_linux-x64"
-  DATADOG_CI_CHECKSUM="f0c002799cb72f6b372c144a753642c99d33e00021054691e865b8076fa624fb"
 fi
 
-curl -L -o "$DATADOG_CI_PATH" "https://github.com/DataDog/datadog-ci/releases/download/v${DATADOG_CI_VERSION}/${DATADOG_CI_BINARY}" || exit 1
-echo "${DATADOG_CI_CHECKSUM}  ${DATADOG_CI_PATH}" | sha256sum -c - || { echo "datadog-ci checksum verification failed"; exit 1; }
+curl -L -o "$DATADOG_CI_PATH" "${DATADOG_CI_RELEASE_BASE}/${DATADOG_CI_BINARY}" || exit 1
+curl -L -o /tmp/datadog-ci-checksums.txt "${DATADOG_CI_RELEASE_BASE}/checksums.txt" || exit 1
+grep "${DATADOG_CI_BINARY}" /tmp/datadog-ci-checksums.txt | sed "s|${DATADOG_CI_BINARY}|${DATADOG_CI_PATH}|" | sha256sum -c - || { echo "datadog-ci checksum verification failed"; exit 1; }
 chmod 755 "$DATADOG_CI_PATH"
 
 # Check that datadog-ci was installed
