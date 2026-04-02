@@ -48,8 +48,8 @@ else
   DATADOG_CI_BINARY="datadog-ci_linux-x64"
 fi
 
-curl -L -o "$DATADOG_CLI_PATH" "${DATADOG_CI_RELEASE_BASE}/${DATADOG_CI_BINARY}" || exit 1
-curl -L -o /tmp/datadog-ci-checksums.txt "${DATADOG_CI_RELEASE_BASE}/checksums.txt" || exit 1
+curl -fL -o "$DATADOG_CLI_PATH" "${DATADOG_CI_RELEASE_BASE}/${DATADOG_CI_BINARY}" || exit 1
+curl -fL -o /tmp/datadog-ci-checksums.txt "${DATADOG_CI_RELEASE_BASE}/checksums.txt" || exit 1
 grep "${DATADOG_CI_BINARY}" /tmp/datadog-ci-checksums.txt | sed "s|${DATADOG_CI_BINARY}|${DATADOG_CLI_PATH}|" | sha256sum -c - || { echo "datadog-ci checksum verification failed"; exit 1; }
 chmod 755 "$DATADOG_CLI_PATH"
 
