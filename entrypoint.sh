@@ -37,7 +37,7 @@ chmod 755 /datadog-sbom-generator/datadog-sbom-generator
 ########################################################
 # datadog-ci stuff
 ########################################################
-DATADOG_CI_VERSION="5.11.0"
+DATADOG_CI_VERSION="5.12.1"
 DATADOG_CLI_PATH="/usr/local/bin/datadog-ci"
 DATADOG_CI_RELEASE_BASE="https://github.com/DataDog/datadog-ci/releases/download/v${DATADOG_CI_VERSION}"
 
