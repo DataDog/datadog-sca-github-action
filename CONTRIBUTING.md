@@ -2,18 +2,16 @@
 
 ## How to release?
 
-In the `main` branch:
+For the full release process (including validation steps), refer to the internal Confluence page: [Release process — datadog-sca-github-action](https://datadoghq.atlassian.net/wiki/spaces/Vulnerabil/pages/6528631938).
 
-1. Create a new tag using `vX.Y.Z` version.
-```
-git tag vX.Y.Z
-git push --tags
-```
-2. Create a new release and mark it as `Latest release` in GitHub.
-3. Replace the tag pointing to the major version using to the same commit than the `vX.Y.Z` tag.
+Summary:
+
+1. Open a PR against `main` and validate your branch before merging.
+2. After merging, create a new GitHub Release from the UI: create a new `vX.Y.Z` tag and mark it as `Latest release`.
+3. (Optional) Move the major version tag to the same commit. This is only needed if users pin to `@vX` instead of `@vX.Y.Z`:
 ```
 git tag --delete vX
-git push --delete vX
-git tag vX 
+git push --delete origin vX
+git tag vX
 git push --tags
 ```
