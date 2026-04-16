@@ -21,6 +21,10 @@ inputs:
     description: "Enable reachability scanning. Defaults to true."
     required: false
     default: "true"
+  exit_on_config_failure:
+    description: "Stop scanning if fetching merged configuration fails. Defaults to false."
+    required: false
+    default: "false"
 runs:
   using: "docker"
   image: "Dockerfile"
@@ -29,3 +33,4 @@ runs:
     DD_APP_KEY: ${{ inputs.dd_app_key }}
     DD_SITE: ${{ inputs.dd_site }}
     REACHABILITY: ${{ inputs.reachability }}
+    EXIT_ON_CONFIG_FAILURE: ${{ inputs.exit_on_config_failure }}
