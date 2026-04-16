@@ -19,6 +19,12 @@ else
 	REACHABILITY_ARG=""
 fi
 
+if [ "$EXIT_ON_CONFIG_FAILURE" = "true" ]; then
+	EXIT_ON_CONFIG_FAILURE_ARG="--exit-on-config-failure"
+else
+	EXIT_ON_CONFIG_FAILURE_ARG=""
+fi
+
 ########################################################
 # datadog-sbom-generator
 ########################################################
@@ -89,7 +95,7 @@ git config --global --add safe.directory ${GITHUB_WORKSPACE} || exit 1
 
 
 echo "Generating SBOM with datadog-sbom-generator"
-/datadog-sbom-generator/datadog-sbom-generator scan --verbosity info $REACHABILITY_ARG --output="$OUTPUT_FILE" . || exit 1
+/datadog-sbom-generator/datadog-sbom-generator scan --verbosity info $REACHABILITY_ARG $EXIT_ON_CONFIG_FAILURE_ARG --output="$OUTPUT_FILE" . || exit 1
 echo "Done"
 
 
