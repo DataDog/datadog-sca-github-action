@@ -44,24 +44,14 @@ chmod 755 /datadog-sbom-generator/datadog-sbom-generator
 # datadog-ci stuff
 ########################################################
 DATADOG_CI_VERSION="5.12.1"
-DATADOG_CLI_PATH="/usr/local/bin/datadog-ci"
-DATADOG_CI_RELEASE_BASE="https://github.com/DataDog/datadog-ci/releases/download/v${DATADOG_CI_VERSION}"
 
 echo "Installing 'datadog-ci' v${DATADOG_CI_VERSION}"
-if [ "$(uname -m)" = "aarch64" ]; then
-  DATADOG_CI_BINARY="datadog-ci_linux-arm64"
-else
-  DATADOG_CI_BINARY="datadog-ci_linux-x64"
-fi
-
-curl -fL -o "$DATADOG_CLI_PATH" "${DATADOG_CI_RELEASE_BASE}/${DATADOG_CI_BINARY}" || exit 1
-curl -fL -o /tmp/datadog-ci-checksums.txt "${DATADOG_CI_RELEASE_BASE}/checksums.txt" || exit 1
-grep "${DATADOG_CI_BINARY}" /tmp/datadog-ci-checksums.txt | sed "s|${DATADOG_CI_BINARY}|${DATADOG_CLI_PATH}|" | sha256sum -c - || { echo "datadog-ci checksum verification failed"; exit 1; }
-chmod 755 "$DATADOG_CLI_PATH"
+npm install -g "@datadog/datadog-ci@${DATADOG_CI_VERSION}" || exit 1
+DATADOG_CLI_PATH="$(which datadog-ci)"
 
 # Check that datadog-ci was installed
 if [ ! -x "$DATADOG_CLI_PATH" ]; then
-    echo "The datadog-ci was not installed correctly, not found in $DATADOG_CLI_PATH."
+    echo "The datadog-ci was not installed correctly."
     exit 1
 fi
 
