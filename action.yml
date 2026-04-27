@@ -99,6 +99,9 @@ runs:
         echo "GIT_CONFIG_GLOBAL=$GIT_CONFIG_GLOBAL" >> "$GITHUB_ENV"
         git config --file "$GIT_CONFIG_GLOBAL" --add safe.directory "$GITHUB_WORKSPACE"
 
+        CURL_ARGS="--fail --silent --show-error --location --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 300 --connect-timeout 15 --max-time 120"
+        echo "CURL_ARGS=$CURL_ARGS" >> "$GITHUB_ENV"
+
     - name: Install datadog-sbom-generator
       shell: bash
       run: |
@@ -108,14 +111,10 @@ runs:
         SBOMGEN_RELEASE_BASE="https://github.com/DataDog/datadog-sbom-generator/releases/download/v${SBOMGEN_VERSION}"
 
         echo "Installing datadog-sbom-generator v${SBOMGEN_VERSION} for $SBOMGEN_ARCH"
-        curl --fail --silent --show-error --location \
-          --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 300 \
-          --connect-timeout 15 --max-time 120 \
+        curl $CURL_ARGS \
           -o "$tmpdir/$SBOMGEN_FILENAME" \
           "${SBOMGEN_RELEASE_BASE}/${SBOMGEN_FILENAME}" || exit 1
-        curl --fail --silent --show-error --location \
-          --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 300 \
-          --connect-timeout 15 --max-time 120 \
+        curl $CURL_ARGS \
           -o "$tmpdir/datadog-sbom-generator_SHA256SUMS" \
           "${SBOMGEN_RELEASE_BASE}/datadog-sbom-generator_SHA256SUMS" || exit 1
 
@@ -168,13 +167,9 @@ runs:
         fi
 
         echo "Installing 'datadog-ci' v${DATADOG_CI_VERSION}"
-        curl --fail --silent --show-error --location \
-          --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 300 \
-          --connect-timeout 15 --max-time 120 \
+        curl $CURL_ARGS \
           -o "$DDCI_PATH" "${DATADOG_CI_RELEASE_BASE}/${DATADOG_CI_BINARY}" || exit 1
-        curl --fail --silent --show-error --location \
-          --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 300 \
-          --connect-timeout 15 --max-time 120 \
+        curl $CURL_ARGS \
           -o "$tmpdir/datadog-ci-checksums.txt" "${DATADOG_CI_RELEASE_BASE}/checksums.txt" || exit 1
 
         expected_checksum="$(awk -v filename="$DATADOG_CI_BINARY" 'index($0, filename) {print $1; exit}' "$tmpdir/datadog-ci-checksums.txt")"
