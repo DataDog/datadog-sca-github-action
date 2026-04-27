@@ -41,12 +41,14 @@ jobs:
       uses: actions/checkout@v4
     - name: Check imported libraries are secure and compliant
       id: datadog-software-composition-analysis
-      uses: DataDog/datadog-sca-github-action@main
+      uses: DataDog/datadog-sca-github-action@v3
       with:
         dd_api_key: ${{ secrets.DD_API_KEY }}
         dd_app_key: ${{ secrets.DD_APP_KEY }}
         dd_site: "datadoghq.com"
 ```
+
+Pin the action to a major version tag, such as `@v3`, to receive compatible updates without tracking unreleased changes from `main`.
 
 ## Related Datadog tools
 

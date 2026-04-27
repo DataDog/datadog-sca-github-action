@@ -26,11 +26,211 @@ inputs:
     required: false
     default: "false"
 runs:
-  using: "docker"
-  image: "Dockerfile"
-  env:
-    DD_API_KEY: ${{ inputs.dd_api_key }}
-    DD_APP_KEY: ${{ inputs.dd_app_key }}
-    DD_SITE: ${{ inputs.dd_site }}
-    REACHABILITY: ${{ inputs.reachability }}
-    EXIT_ON_CONFIG_FAILURE: ${{ inputs.exit_on_config_failure }}
+  using: "composite"
+  steps:
+    - name: Set up environment
+      shell: bash
+      env:
+        DD_API_KEY: ${{ inputs.dd_api_key }}
+        DD_APP_KEY: ${{ inputs.dd_app_key }}
+        RUNNER_OS: ${{ runner.os }}
+        RUNNER_ARCH: ${{ runner.arch }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD: ${{ env.DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD }}
+      run: |
+        DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD_ALLOWED="false"
+        if [ "$DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD" = "true" ] && [ "$GITHUB_REPOSITORY" = "DataDog/datadog-sca-github-action" ]; then
+          DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD_ALLOWED="true"
+        fi
+        echo "DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD_ALLOWED=$DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD_ALLOWED" >> "$GITHUB_ENV"
+
+        if [ -z "$DD_API_KEY" ] && [ "$DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD_ALLOWED" != "true" ]; then
+          echo "::error title=Missing credentials::dd_api_key must be set"
+          exit 1
+        fi
+        if [ -z "$DD_APP_KEY" ] && [ "$DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD_ALLOWED" != "true" ]; then
+          echo "::error title=Missing credentials::dd_app_key must be set"
+          exit 1
+        fi
+
+        case "$RUNNER_ARCH" in
+          X64)   SBOMGEN_ARCH="amd64" ; DDCI_ARCH="x64"   ;;
+          ARM64) SBOMGEN_ARCH="arm64" ; DDCI_ARCH="arm64"  ;;
+          *)
+            echo "::error title=Unsupported architecture::this action does not support $RUNNER_ARCH"
+            exit 1
+            ;;
+        esac
+        echo "SBOMGEN_ARCH=$SBOMGEN_ARCH" >> "$GITHUB_ENV"
+        echo "DDCI_ARCH=$DDCI_ARCH" >> "$GITHUB_ENV"
+
+        case "$RUNNER_OS" in
+          Linux)
+            SBOMGEN_OS="linux"
+            DDCI_OS="linux"
+            ;;
+          macOS)
+            SBOMGEN_OS="darwin"
+            DDCI_OS="darwin"
+            ;;
+          Windows)
+            if [ "$DDCI_ARCH" != "x64" ]; then
+              echo "::error title=Unsupported platform::this action does not support $RUNNER_OS/$RUNNER_ARCH"
+              exit 1
+            fi
+            SBOMGEN_OS="windows"
+            DDCI_OS="win"
+            ;;
+          *)
+            echo "::error title=Unsupported platform::this action does not support $RUNNER_OS/$RUNNER_ARCH"
+            exit 1
+            ;;
+        esac
+        echo "SBOMGEN_OS=$SBOMGEN_OS" >> "$GITHUB_ENV"
+        echo "DDCI_OS=$DDCI_OS" >> "$GITHUB_ENV"
+
+        DATADOG_SCA_ROOT="$(mktemp -d)"
+        DATADOG_SCA_BIN_DIR="$DATADOG_SCA_ROOT/bin"
+        mkdir -p "$DATADOG_SCA_BIN_DIR"
+        echo "$DATADOG_SCA_BIN_DIR" >> "$GITHUB_PATH"
+        echo "DATADOG_SCA_BIN_DIR=$DATADOG_SCA_BIN_DIR" >> "$GITHUB_ENV"
+
+        GIT_CONFIG_GLOBAL="$DATADOG_SCA_ROOT/gitconfig"
+        echo "GIT_CONFIG_GLOBAL=$GIT_CONFIG_GLOBAL" >> "$GITHUB_ENV"
+        git config --file "$GIT_CONFIG_GLOBAL" --add safe.directory "$GITHUB_WORKSPACE"
+
+        CURL_ARGS="--fail --silent --show-error --location --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 300 --connect-timeout 15 --max-time 120"
+        echo "CURL_ARGS=$CURL_ARGS" >> "$GITHUB_ENV"
+
+    - name: Install datadog-sbom-generator
+      shell: bash
+      run: |
+        SBOMGEN_VERSION="1.10.0"
+        tmpdir="$(mktemp -d)"
+        SBOMGEN_FILENAME="datadog-sbom-generator_${SBOMGEN_OS}_${SBOMGEN_ARCH}.zip"
+        SBOMGEN_RELEASE_BASE="https://github.com/DataDog/datadog-sbom-generator/releases/download/v${SBOMGEN_VERSION}"
+
+        echo "Installing datadog-sbom-generator v${SBOMGEN_VERSION} for $SBOMGEN_ARCH"
+        curl $CURL_ARGS \
+          -o "$tmpdir/$SBOMGEN_FILENAME" \
+          "${SBOMGEN_RELEASE_BASE}/${SBOMGEN_FILENAME}" || exit 1
+        curl $CURL_ARGS \
+          -o "$tmpdir/datadog-sbom-generator_SHA256SUMS" \
+          "${SBOMGEN_RELEASE_BASE}/datadog-sbom-generator_SHA256SUMS" || exit 1
+
+        expected_checksum="$(awk -v filename="$SBOMGEN_FILENAME" 'index($0, filename) {print $1; exit}' "$tmpdir/datadog-sbom-generator_SHA256SUMS")"
+        if [ -z "$expected_checksum" ]; then
+          echo "::error title=Checksum verification failed::checksum for $SBOMGEN_FILENAME was not found"
+          exit 1
+        fi
+
+        if command -v sha256sum >/dev/null 2>&1; then
+          actual_checksum="$(sha256sum "$tmpdir/$SBOMGEN_FILENAME" | awk '{print $1}')"
+        elif command -v shasum >/dev/null 2>&1; then
+          actual_checksum="$(shasum -a 256 "$tmpdir/$SBOMGEN_FILENAME" | awk '{print $1}')"
+        elif command -v openssl >/dev/null 2>&1; then
+          actual_checksum="$(openssl dgst -sha256 "$tmpdir/$SBOMGEN_FILENAME" | awk '{print $NF}')"
+        else
+          echo "::error title=Checksum verification failed::no supported SHA256 tool found"
+          exit 1
+        fi
+
+        if [ "$actual_checksum" != "$expected_checksum" ]; then
+          echo "::error title=Checksum verification failed::datadog-sbom-generator checksum verification failed"
+          exit 1
+        fi
+
+        unzip -q "$tmpdir/$SBOMGEN_FILENAME" -d "$DATADOG_SCA_BIN_DIR"
+
+        SBOMGEN_PATH="$DATADOG_SCA_BIN_DIR/datadog-sbom-generator"
+        if [ -f "$SBOMGEN_PATH.exe" ]; then
+          SBOMGEN_PATH="$SBOMGEN_PATH.exe"
+        fi
+        if [ ! -f "$SBOMGEN_PATH" ]; then
+          echo "::error title=Install failed::datadog-sbom-generator was not found after extraction"
+          exit 1
+        fi
+        chmod +x "$SBOMGEN_PATH"
+        echo "SBOMGEN_PATH=$SBOMGEN_PATH" >> "$GITHUB_ENV"
+        echo "Done: datadog-sbom-generator installed"
+
+    - name: Install datadog-ci
+      shell: bash
+      run: |
+        DATADOG_CI_VERSION="5.12.1"
+        DATADOG_CI_BINARY="datadog-ci_${DDCI_OS}-${DDCI_ARCH}"
+        DATADOG_CI_RELEASE_BASE="https://github.com/DataDog/datadog-ci/releases/download/v${DATADOG_CI_VERSION}"
+        tmpdir="$(mktemp -d)"
+        DDCI_PATH="$DATADOG_SCA_BIN_DIR/datadog-ci"
+        if [ "$DDCI_OS" = "win" ]; then
+          DDCI_PATH="$DDCI_PATH.exe"
+        fi
+
+        echo "Installing 'datadog-ci' v${DATADOG_CI_VERSION}"
+        curl $CURL_ARGS \
+          -o "$DDCI_PATH" "${DATADOG_CI_RELEASE_BASE}/${DATADOG_CI_BINARY}" || exit 1
+        curl $CURL_ARGS \
+          -o "$tmpdir/datadog-ci-checksums.txt" "${DATADOG_CI_RELEASE_BASE}/checksums.txt" || exit 1
+
+        expected_checksum="$(awk -v filename="$DATADOG_CI_BINARY" 'index($0, filename) {print $1; exit}' "$tmpdir/datadog-ci-checksums.txt")"
+        if [ -z "$expected_checksum" ]; then
+          echo "::error title=Checksum verification failed::checksum for $DATADOG_CI_BINARY was not found"
+          exit 1
+        fi
+
+        if command -v sha256sum >/dev/null 2>&1; then
+          actual_checksum="$(sha256sum "$DDCI_PATH" | awk '{print $1}')"
+        elif command -v shasum >/dev/null 2>&1; then
+          actual_checksum="$(shasum -a 256 "$DDCI_PATH" | awk '{print $1}')"
+        elif command -v openssl >/dev/null 2>&1; then
+          actual_checksum="$(openssl dgst -sha256 "$DDCI_PATH" | awk '{print $NF}')"
+        else
+          echo "::error title=Checksum verification failed::no supported SHA256 tool found"
+          exit 1
+        fi
+
+        if [ "$actual_checksum" != "$expected_checksum" ]; then
+          echo "::error title=Checksum verification failed::datadog-ci checksum verification failed"
+          exit 1
+        fi
+
+        chmod +x "$DDCI_PATH"
+        echo "DDCI_PATH=$DDCI_PATH" >> "$GITHUB_ENV"
+        echo "Done: datadog-ci $("$DDCI_PATH" version)"
+
+    - name: Generate and upload SBOM
+      shell: bash
+      env:
+        DD_API_KEY: ${{ inputs.dd_api_key }}
+        DD_APP_KEY: ${{ inputs.dd_app_key }}
+        DD_SITE: ${{ inputs.dd_site }}
+        REACHABILITY: ${{ inputs.reachability }}
+        EXIT_ON_CONFIG_FAILURE: ${{ inputs.exit_on_config_failure }}
+      run: |
+        if [ "$DD_SCA_ACTION_TEST_SKIP_SCAN_UPLOAD_ALLOWED" = "true" ]; then
+          echo "Skipping SBOM generation and upload after successful tool installation"
+          exit 0
+        fi
+
+        scan_args=(scan --verbosity info)
+
+        if [ "$REACHABILITY" = "true" ]; then
+          scan_args+=(--reachability)
+        fi
+
+        if [ "$EXIT_ON_CONFIG_FAILURE" = "true" ]; then
+          scan_args+=(--exit-on-config-failure)
+        fi
+
+        OUTPUT_FILE="$(mktemp /tmp/sbom.XXXXXX.json)"
+        scan_args+=(--output="$OUTPUT_FILE" .)
+
+        cd "$GITHUB_WORKSPACE"
+
+        echo "Generating SBOM with datadog-sbom-generator"
+        "$SBOMGEN_PATH" "${scan_args[@]}" || exit 1
+        echo "Done"
+
+        echo "Uploading results to Datadog"
+        "$DDCI_PATH" sbom upload --source github-action --service datadog-sbom-generator --env ci "$OUTPUT_FILE" || exit 1
+        echo "Done"
