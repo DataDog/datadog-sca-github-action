@@ -1,0 +1,40 @@
+name: Test Platforms
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test-platforms:
+    name: Test on ${{ matrix.target }}
+    runs-on: ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Add a commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "SCA GitHub Action platform test $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Run action
+        uses: ./
+        env:
+          TEST_SKIP_SCAN_UPLOAD: "true"
+        with:
+          dd_api_key: test-api-key
+          dd_app_key: test-app-key
+          dd_site: datadoghq.com

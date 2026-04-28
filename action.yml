@@ -35,12 +35,16 @@ runs:
         DD_APP_KEY: ${{ inputs.dd_app_key }}
         RUNNER_OS: ${{ runner.os }}
         RUNNER_ARCH: ${{ runner.arch }}
+        TEST_SKIP_SCAN_UPLOAD: ${{ env.TEST_SKIP_SCAN_UPLOAD }}
       run: |
-        if [ -z "$DD_API_KEY" ]; then
+        TEST_SKIP_SCAN_UPLOAD="${TEST_SKIP_SCAN_UPLOAD:-false}"
+        echo "TEST_SKIP_SCAN_UPLOAD=$TEST_SKIP_SCAN_UPLOAD" >> "$GITHUB_ENV"
+
+        if [ -z "$DD_API_KEY" ] && [ "$TEST_SKIP_SCAN_UPLOAD" != "true" ]; then
           echo "::error title=Missing credentials::dd_api_key must be set"
           exit 1
         fi
-        if [ -z "$DD_APP_KEY" ]; then
+        if [ -z "$DD_APP_KEY" ] && [ "$TEST_SKIP_SCAN_UPLOAD" != "true" ]; then
           echo "::error title=Missing credentials::dd_app_key must be set"
           exit 1
         fi
@@ -199,6 +203,11 @@ runs:
         REACHABILITY: ${{ inputs.reachability }}
         EXIT_ON_CONFIG_FAILURE: ${{ inputs.exit_on_config_failure }}
       run: |
+        if [ "$TEST_SKIP_SCAN_UPLOAD" = "true" ]; then
+          echo "Skipping SBOM generation and upload after successful tool installation"
+          exit 0
+        fi
+
         scan_args=(scan --verbosity info)
 
         if [ "$REACHABILITY" = "true" ]; then
