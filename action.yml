@@ -25,6 +25,10 @@ inputs:
     description: "Stop scanning if fetching merged configuration fails. Defaults to false."
     required: false
     default: "false"
+  manifest_parsers:
+    description: "Also run parsers that extract packages from manifest files (e.g. pyproject.toml) when no lock file is present. Defaults to false."
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -101,7 +105,7 @@ runs:
     - name: Install datadog-sbom-generator
       shell: bash
       run: |
-        SBOMGEN_VERSION="1.10.0"
+        SBOMGEN_VERSION="1.11.0"
         tmpdir="$(mktemp -d)"
         SBOMGEN_FILENAME="datadog-sbom-generator_${SBOMGEN_OS}_${SBOMGEN_ARCH}.zip"
         SBOMGEN_RELEASE_BASE="https://github.com/DataDog/datadog-sbom-generator/releases/download/v${SBOMGEN_VERSION}"
@@ -202,6 +206,7 @@ runs:
         DD_SITE: ${{ inputs.dd_site }}
         REACHABILITY: ${{ inputs.reachability }}
         EXIT_ON_CONFIG_FAILURE: ${{ inputs.exit_on_config_failure }}
+        MANIFEST_PARSERS: ${{ inputs.manifest_parsers }}
       run: |
         if [ "$TEST_SKIP_SCAN_UPLOAD" = "true" ]; then
           echo "Skipping SBOM generation and upload after successful tool installation"
@@ -216,6 +221,10 @@ runs:
 
         if [ "$EXIT_ON_CONFIG_FAILURE" = "true" ]; then
           scan_args+=(--exit-on-config-failure)
+        fi
+
+        if [ "$MANIFEST_PARSERS" = "true" ]; then
+          scan_args+=(--manifest-parsers)
         fi
 
         OUTPUT_FILE="$(mktemp /tmp/sbom.XXXXXX.json)"
