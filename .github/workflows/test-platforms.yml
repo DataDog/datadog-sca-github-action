@@ -2,7 +2,10 @@ name: Test Platforms
 
 on:
   push:
+    branches:
+      - "**"
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   test-platforms:
