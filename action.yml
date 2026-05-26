@@ -100,7 +100,7 @@ runs:
     - name: Install datadog-sbom-generator
       shell: bash
       run: |
-        SBOMGEN_VERSION="1.13.1"
+        SBOMGEN_VERSION="1.14.0"
         tmpdir="$(mktemp -d)"
         SBOMGEN_FILENAME="datadog-sbom-generator_${SBOMGEN_OS}_${SBOMGEN_ARCH}.zip"
         SBOMGEN_RELEASE_BASE="https://github.com/DataDog/datadog-sbom-generator/releases/download/v${SBOMGEN_VERSION}"
